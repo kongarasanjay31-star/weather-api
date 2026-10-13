@@ -1,0 +1,231 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Report</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #74ebd5, #9face6);
+            text-align: center;
+            padding: 60px 15px;
+        }
+
+        .box {
+            background: white;
+            max-width: 350px;
+            margin: auto;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px #777;
+        }
+
+        input, button {
+            padding: 12px;
+            margin: 8px 0;
+            width: 90%;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background: #2463eb;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+
+        #report {
+            display: none;
+            background: #eef5ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        #message {
+            color: #c0392b;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        <h1>🌦️ Weather Report</h1>
+
+        <input id="city" type="text" placeholder="Enter city name">
+        <button onclick="getWeather()">Get Weather</button>
+
+        <p id="message"></p>
+
+        <div id="report">
+            <h2 id="cityName"></h2>
+            <h1 id="temperature"></h1>
+            <p id="condition"></p>
+            <p id="humidity"></p>
+        </div>
+    </div>
+
+    <script>
+        async function getWeather() {
+            const city = document.getElementById("city").value.trim();
+            const message = document.getElementById("message");
+            const report = document.getElementById("report");
+
+            message.textContent = "";
+            report.style.display = "none";
+
+            if (!city) {
+                message.textContent = "Please enter a city name.";
+                return;
+            }
+
+            try {
+                // Find the city's latitude and longitude
+                const geoResponse = await fetch(
+                    "https://geocoding-api.open-meteo.com/v1/search?name=" +
+                    encodeURIComponent(city) + "&count=1&language=en&format=json"
+                );
+
+                if (!geoResponse.ok) throw new Error("Network error");
+
+                const geoData = await geoResponse.json();
+
+                if (!geoData.results || geoData.results.length === 0) {
+                    throw new Error("City not found. Check the spelling.");
+                }
+
+                const place = geoData.results[0];
+
+                // Get current weather for the city
+                const weatherResponse = await fetch(
+                    `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m,relative_humidity_2m,weather_code&timezone=auto`
+                );
+
+                if (!weatherResponse.ok) throw new Error("Weather unavailable");
+
+                const weatherData = await weatherResponse.json();
+                const current = weatherData.current;
+
+                const codes = {
+                    0: "Clear sky",
+                    1: "Mainly clear",
+                    2: "Partly cloudy",
+                    3: "Cloudy",
+                    45: "Foggy",
+                    48: "Foggy",
+                    51: "Light drizzle",
+                    53: "Drizzle",
+                    55: "Heavy drizzle",
+                    61: "Light rain",
+                    63: "Rain",
+                    65: "Heavy rain",
+                    71: "Light snow",
+                    73: "Snow",
+                    75: "Heavy snow",
+                    80: "Rain showers",
+                    81: "Rain showers",
+                    82: "Heavy rain showers",
+                    95: "Thunderstorm",
+                    96: "Thunderstorm with hail",
+                    99: "Heavy thunderstorm"
+                };
+
+                document.getElementById("cityName").textContent =
+                    place.name + (place.country ? ", " + place.country : "");
+
+                document.getElementById("temperature").textContent =
+                    current.temperature_2m + " °C";
+
+                document.getElementById("condition").textContent =
+                    "Condition: " + (codes[current.weather_code] || "Unknown");
+
+                document.getElementById("humidity").textContent =
+                    "Humidity: " + current.relative_humidity_2m + "%";
+
+                report.style.display = "block";
+
+            } catch (error) {
+                message.textContent =
+                    error.message + " Please check your internet connection.";
+            }
+        }
+
+        document.getElementById("city").addEventListener("keydown", function(e) {
+            if (e.key === "Enter") getWeather();
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
